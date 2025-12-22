@@ -13,6 +13,7 @@ function App() {
   const [input, setInput] = useState("");
   const [activePdf, setActivePdf] = useState(PDF_LIST[0]);
   const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile toggle state
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -21,7 +22,6 @@ function App() {
 
   const askAi = async () => {
     if (!input.trim() || loading) return;
-    
     const userText = input;
     setMessages(prev => [...prev, { role: 'user', text: userText }]);
     setInput("");
@@ -33,33 +33,25 @@ function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userText, mode: "query" }),
       });
-
       const data = await response.json();
-
-      if (data.error) {
-        // This catches the 429 Rate Limit error from the Proxy
-        setMessages(prev => [...prev, { 
-          role: 'bot', 
-          text: data.error 
-        }]);
-      } else {
-        setMessages(prev => [...prev, { 
-          role: 'bot', 
-          text: data.textResponse || "No answer found in this DCR." 
-        }]);
-      }
-    } catch (err) {
       setMessages(prev => [...prev, { 
         role: 'bot', 
-        text: "Connection error: The service may be sleeping. Please try again in a few seconds." 
+        text: data.error || data.textResponse || "No answer found." 
       }]);
+    } catch (err) {
+      setMessages(prev => [...prev, { role: 'bot', text: "Connection error." }]);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="app-container">
+    // We add 'sidebar-open' class to the container based on state
+    <div className={`app-container ${sidebarOpen ? 'sidebar-open' : ''}`}>
+      
+      {/* This overlay closes the menu when you click outside it on mobile */}
+      <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>
+
       <div className="sidebar">
         <h2 className="logo">DCR Assistant</h2>
         <div className="nav-list">
@@ -67,7 +59,11 @@ function App() {
             <button 
               key={pdf.id}
               className={`nav-item ${activePdf.id === pdf.id ? 'active' : ''}`}
-              onClick={() => { setActivePdf(pdf); setMessages([]); }}
+              onClick={() => { 
+                setActivePdf(pdf); 
+                setMessages([]); 
+                setSidebarOpen(false); // Close menu after selecting on mobile
+              }}
             >
               {pdf.name}
             </button>
@@ -77,25 +73,24 @@ function App() {
 
       <div className="main-chat">
         <div className="chat-header">
-          Chatting with: <strong>{activePdf.name}</strong>
+          <button className="menu-toggle" onClick={() => setSidebarOpen(true)}>
+            ☰ Menu
+          </button>
+          <div>Chatting with: <strong>{activePdf.name}</strong></div>
         </div>
 
         <div className="message-list">
           {messages.length === 0 && (
-            <div className="welcome">
-              Ask a question about {activePdf.name} rules (e.g., FSI, parking, or fire safety).
-            </div>
+            <div className="welcome">Ask about {activePdf.name} regulations.</div>
           )}
-          
           {messages.map((m, i) => (
             <div key={i} className={`message ${m.role}`}>
               <div className="bubble">{m.text}</div>
             </div>
           ))}
-          
           {loading && (
             <div className="message bot">
-              <div className="bubble thinking">Analyzing DCR documents...</div>
+              <div className="bubble thinking">Analyzing PDF...</div>
             </div>
           )}
           <div ref={bottomRef} />
@@ -106,9 +101,9 @@ function App() {
             value={input} 
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && askAi()}
-            placeholder={`Ask about ${activePdf.name}...`}
+            placeholder="Type your query..."
           />
-          <button onClick={askAi} disabled={loading}>
+          <button className="send-btn" onClick={askAi} disabled={loading}>
             {loading ? "..." : "Send"}
           </button>
         </div>
