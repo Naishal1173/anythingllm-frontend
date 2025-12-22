@@ -15,7 +15,6 @@ function App() {
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
 
-  // Auto-scroll to bottom whenever messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -37,11 +36,11 @@ function App() {
 
       const data = await response.json();
 
-      // Check if the Proxy returned a rate limit or validation error
       if (data.error) {
+        // This catches the 429 Rate Limit error from the Proxy
         setMessages(prev => [...prev, { 
           role: 'bot', 
-          text: data.error // Displays: "Too many questions! Please wait 15 minutes..."
+          text: data.error 
         }]);
       } else {
         setMessages(prev => [...prev, { 
@@ -52,7 +51,7 @@ function App() {
     } catch (err) {
       setMessages(prev => [...prev, { 
         role: 'bot', 
-        text: "Connection error: Please ensure the Proxy Server (Port 4000) is running." 
+        text: "Connection error: The service may be sleeping. Please try again in a few seconds." 
       }]);
     } finally {
       setLoading(false);
@@ -84,7 +83,7 @@ function App() {
         <div className="message-list">
           {messages.length === 0 && (
             <div className="welcome">
-              Ask a specific question about {activePdf.name} regulations.
+              Ask a question about {activePdf.name} rules (e.g., FSI, parking, or fire safety).
             </div>
           )}
           
@@ -96,7 +95,7 @@ function App() {
           
           {loading && (
             <div className="message bot">
-              <div className="bubble thinking">Analyzing PDF context...</div>
+              <div className="bubble thinking">Analyzing DCR documents...</div>
             </div>
           )}
           <div ref={bottomRef} />
@@ -107,7 +106,7 @@ function App() {
             value={input} 
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && askAi()}
-            placeholder={`Type your ${activePdf.name} query...`}
+            placeholder={`Ask about ${activePdf.name}...`}
           />
           <button onClick={askAi} disabled={loading}>
             {loading ? "..." : "Send"}
