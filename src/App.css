@@ -218,3 +218,21 @@ input {
   width: 240px;
   transform: translateX(0);
 }
+/* Portal Specific Styles */
+.portal-container {
+    padding: 20px;
+    background-color: #f0f2f5;
+    height: 100vh;
+}
+
+.hero {
+    background: white;
+    padding: 50px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.hero h1 { color: #1e293b; margin-bottom: 10px; }
+.hero p { color: #64748b; }

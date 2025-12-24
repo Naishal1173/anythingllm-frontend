@@ -14,6 +14,7 @@ function App() {
   const [activePdf, setActivePdf] = useState(PDF_LIST[0]);
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [chatWindowVisible, setChatWindowVisible] = useState(false); // Controls the widget popup
   const bottomRef = useRef(null);
 
   // Detect if the app is inside an iframe
@@ -22,6 +23,18 @@ function App() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Handle clicking outside the widget to close it
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const container = document.getElementById('chat-widget-container');
+      if (container && !container.contains(event.target) && chatWindowVisible) {
+        setChatWindowVisible(false);
+      }
+    };
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, [chatWindowVisible]);
 
   const askAi = async () => {
     if (!input.trim() || loading) return;
@@ -48,8 +61,49 @@ function App() {
     }
   };
 
+  // --- RENDER 1: THE PORTAL VIEW (Host Site) ---
+  if (!isWidget) {
+    return (
+      <div className="portal-container">
+        <div className="hero">
+          <h1>Development Control Regulations (DCR)</h1>
+          <p>Welcome to the official portal for DNH, Gujarat, and Diu regulations.</p>
+        </div>
+
+        <div id="chat-widget-container" style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000 }}>
+          <button 
+            id="chat-launcher" 
+            onClick={(e) => { e.stopPropagation(); setChatWindowVisible(!chatWindowVisible); }}
+            style={{ 
+                width: '60px', height: '60px', borderRadius: '50%', 
+                backgroundColor: chatWindowVisible ? '#ef4444' : '#2563eb',
+                color: 'white', border: 'none', cursor: 'pointer', 
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)', fontSize: '24px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}
+          >
+            {chatWindowVisible ? '✖' : '💬'}
+          </button>
+
+          {chatWindowVisible && (
+            <div id="chat-window" style={{ 
+                position: 'absolute', bottom: '80px', right: 0, 
+                width: '380px', height: '600px', borderRadius: '16px', 
+                overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', 
+                border: '1px solid #e2e8f0', background: 'white' 
+            }}>
+              {/* Point back to itself, but it will detect it's an iframe next time */}
+              <iframe src="/" title="chatbot-iframe" style={{ width: '100%', height: '100%', border: 'none' }}></iframe>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // --- RENDER 2: THE CHATBOT VIEW (Inside Iframe) ---
   return (
-    <div className={`app-container ${sidebarOpen ? 'sidebar-open' : ''} ${isWidget ? 'widget-mode' : ''}`}>
+    <div className={`app-container ${sidebarOpen ? 'sidebar-open' : ''} widget-mode`}>
       <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>
 
       <div className="sidebar">
