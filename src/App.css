@@ -5,17 +5,22 @@
   --sidebar-bg: #0f172a;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* 1. RESET & BASE STYLES */
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
 
 .app-container { 
   display: flex; 
   height: 100vh; 
   background: var(--bg); 
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  overflow: hidden; /* Prevent body scroll */
+  overflow: hidden; 
 }
 
-/* --- Sidebar --- */
+/* 2. SIDEBAR STYLES */
 .sidebar { 
   width: 280px; 
   background: var(--sidebar-bg); 
@@ -27,22 +32,48 @@
   z-index: 100;
 }
 
-.logo { margin-bottom: 30px; font-size: 1.4rem; color: #38bdf8; font-weight: bold; }
-.nav-list { display: flex; flex-direction: column; gap: 10px; }
+.logo { 
+  margin-bottom: 30px; 
+  font-size: 1.4rem; 
+  color: #38bdf8; 
+  font-weight: bold; 
+}
+
+.nav-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 10px; 
+}
+
 .nav-item { 
-  background: transparent; color: #94a3b8; border: none; padding: 12px; 
-  text-align: left; cursor: pointer; border-radius: 6px; transition: 0.2s;
+  background: transparent; 
+  color: #94a3b8; 
+  border: none; 
+  padding: 12px; 
+  text-align: left; 
+  cursor: pointer; 
+  border-radius: 6px; 
+  transition: 0.2s;
   font-size: 1rem;
 }
-.nav-item:hover { background: #1e293b; color: white; }
-.nav-item.active { background: var(--primary); color: white; font-weight: bold; }
 
-/* --- Chat Area --- */
+.nav-item:hover { 
+  background: #1e293b; 
+  color: white; 
+}
+
+.nav-item.active { 
+  background: var(--primary); 
+  color: white; 
+  font-weight: bold; 
+}
+
+/* 3. MAIN CHAT AREA */
 .main-chat { 
   flex: 1; 
   display: flex; 
   flex-direction: column; 
-  min-width: 0; /* Important for flex child overflow */
+  min-width: 0; 
 }
 
 .chat-header { 
@@ -55,9 +86,8 @@
   gap: 15px;
 }
 
-/* Mobile Menu Toggle (Hidden on Desktop) */
 .menu-toggle {
-  display: none;
+  display: none; /* Hidden on desktop, shown in mobile/widget */
   background: var(--primary);
   color: white;
   border: none;
@@ -75,8 +105,15 @@
   gap: 15px; 
 }
 
-.message { display: flex; width: 100%; }
-.message.user { justify-content: flex-end; }
+/* 4. CHAT BUBBLES */
+.message { 
+  display: flex; 
+  width: 100%; 
+}
+
+.message.user { 
+  justify-content: flex-end; 
+}
 
 .bubble { 
   max-width: 85%; 
@@ -87,12 +124,24 @@
   word-wrap: break-word;
 }
 
-.user .bubble { background: var(--primary); color: white; border-bottom-right-radius: 2px; }
-.bot .bubble { background: #e2e8f0; color: var(--text-dark); border-bottom-left-radius: 2px; }
+.user .bubble { 
+  background: var(--primary); 
+  color: white; 
+  border-bottom-right-radius: 2px; 
+}
 
-.thinking { font-style: italic; opacity: 0.8; }
+.bot .bubble { 
+  background: #e2e8f0; 
+  color: var(--text-dark); 
+  border-bottom-left-radius: 2px; 
+}
 
-/* --- Input Area --- */
+.thinking { 
+  font-style: italic; 
+  opacity: 0.8; 
+}
+
+/* 5. INPUT AREA */
 .input-area { 
   padding: 15px; 
   background: white; 
@@ -107,7 +156,7 @@ input {
   padding: 12px; 
   border-radius: 8px; 
   outline: none; 
-  font-size: 16px; /* Prevents iOS auto-zoom */
+  font-size: 16px; 
 }
 
 .send-btn { 
@@ -120,29 +169,18 @@ input {
   font-weight: bold;
 }
 
-/* ======================================================
-   RESPONSIVE MEDIA QUERIES
-   ====================================================== */
-
-/* --- Tablet & Mobile Layout (Below 768px) --- */
+/* 6. RESPONSIVE / MOBILE OVERLAYS */
 @media (max-width: 768px) {
   .menu-toggle { display: block; }
-
   .sidebar {
     position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    transform: translateX(-100%); /* Start hidden */
+    left: 0; top: 0; bottom: 0;
+    transform: translateX(-100%);
   }
-
-  /* When Sidebar is Open */
   .app-container.sidebar-open .sidebar {
     transform: translateX(0);
     box-shadow: 10px 0 30px rgba(0,0,0,0.3);
   }
-
-  /* Overlay when sidebar is open */
   .sidebar-overlay {
     display: none;
     position: fixed;
@@ -151,14 +189,32 @@ input {
     z-index: 99;
   }
   .app-container.sidebar-open .sidebar-overlay { display: block; }
-
-  .bubble { max-width: 90%; }
 }
 
-/* --- Small Mobile (Below 480px) --- */
-@media (max-width: 480px) {
-  .chat-header { padding: 10px 15px; font-size: 0.9rem; }
-  .message-list { padding: 15px; }
-  .input-area { padding: 10px; }
-  .send-btn { padding: 0 15px; }
+/* 7. WIDGET MODE (Inside Iframe Overrides) */
+.widget-mode .sidebar {
+  display: none; /* Hide full sidebar in the small window */
+}
+
+.widget-mode .menu-toggle {
+  display: block; /* Use the hamburger menu to switch PDFs */
+}
+
+.widget-mode .chat-header {
+  padding: 10px 15px;
+  font-size: 0.85rem;
+}
+
+.widget-mode .bubble {
+  font-size: 0.85rem;
+  max-width: 90%;
+}
+
+/* Force the mobile-style drawer when switching PDFs in the widget */
+.widget-mode.sidebar-open .sidebar {
+  display: flex;
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 240px;
+  transform: translateX(0);
 }

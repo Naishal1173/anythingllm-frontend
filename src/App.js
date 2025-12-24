@@ -13,8 +13,11 @@ function App() {
   const [input, setInput] = useState("");
   const [activePdf, setActivePdf] = useState(PDF_LIST[0]);
   const [loading, setLoading] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile toggle state
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const bottomRef = useRef(null);
+
+  // Detect if the app is inside an iframe
+  const isWidget = window.self !== window.top;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,10 +49,7 @@ function App() {
   };
 
   return (
-    // We add 'sidebar-open' class to the container based on state
-    <div className={`app-container ${sidebarOpen ? 'sidebar-open' : ''}`}>
-      
-      {/* This overlay closes the menu when you click outside it on mobile */}
+    <div className={`app-container ${sidebarOpen ? 'sidebar-open' : ''} ${isWidget ? 'widget-mode' : ''}`}>
       <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>
 
       <div className="sidebar">
@@ -62,7 +62,7 @@ function App() {
               onClick={() => { 
                 setActivePdf(pdf); 
                 setMessages([]); 
-                setSidebarOpen(false); // Close menu after selecting on mobile
+                setSidebarOpen(false); 
               }}
             >
               {pdf.name}
@@ -81,7 +81,7 @@ function App() {
 
         <div className="message-list">
           {messages.length === 0 && (
-            <div className="welcome">Ask about {activePdf.name} regulations.</div>
+            <div className="welcome">Hello! 👋<br/>Ask about {activePdf.name} regulations.</div>
           )}
           {messages.map((m, i) => (
             <div key={i} className={`message ${m.role}`}>
